@@ -112,6 +112,7 @@
 	
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
 		
+        // Disable this branch if needed later
 		UITableViewController * tableViewController = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
 		[tableViewController.tableView setDelegate:self];
 		[tableViewController.tableView setDataSource:self];
@@ -280,6 +281,15 @@
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	if (!_alwaysShowSearchResult) [self setSearchResultsVisible:NO];
 }
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section {
+    return 0.01f;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
+    return [UIView new];
+}
+
 
 #pragma mark TextField Methods
 
@@ -558,6 +568,8 @@ NSString * const kTextHidden = @"\u200D"; // Zero-Width Joiner
 	_removesTokensOnEndEditing = YES;
 	_tokenizingCharacters = [NSCharacterSet characterSetWithCharactersInString:@","];
     _tokenLimit = -1;
+    
+    [self.scrollView setScrollEnabled:true];
 }
 
 #pragma mark Property Overrides
@@ -1080,7 +1092,10 @@ NSString * const kTextHidden = @"\u200D"; // Zero-Width Joiner
 	
 	if ([string rangeOfCharacterFromSet:_tokenField.tokenizingCharacters].location != NSNotFound && !_tokenField.forcePickSearchResult){
 		[_tokenField tokenizeText];
-		return NO;
+        if (string.length == 1) {
+            return NO;
+        }
+		return YES;
 	}
 	
 	if ([_delegate respondsToSelector:@selector(textField:shouldChangeCharactersInRange:replacementString:)]){
@@ -1122,10 +1137,10 @@ NSString * const kTextHidden = @"\u200D"; // Zero-Width Joiner
 #pragma mark - TIToken -
 //==========================================================
 
-CGFloat const hTextPadding = 14;
-CGFloat const vTextPadding = 8;
-CGFloat const kDisclosureThickness = 2.5;
 NSLineBreakMode const kLineBreakMode = NSLineBreakByTruncatingTail;
+CGFloat const hTextPadding = 16;
+CGFloat const vTextPadding = 10;
+CGFloat const kDisclosureThickness = 1.0;
 
 @interface TIToken (Private)
 CGPathRef CGPathCreateTokenPath(CGSize size, BOOL innerPath);
@@ -1299,6 +1314,17 @@ CGPathRef CGPathCreateDisclosureIndicatorPath(CGPoint arrowPointFront, CGFloat h
 	CGFloat alpha = 1;
 	[self getTintColorRed:&red green:&green blue:&blue alpha:&alpha];
 	
+    if (self.isValid) {
+        red = 0.24;
+        green = 0.65;
+        blue = 0.95;
+    }
+    else{
+        red = 1.0;
+        green = 0.0;
+        blue = 0.0;
+    }
+    
 	if (drawHighlighted){
 		CGContextSetFillColor(context, (CGFloat[4]){red, green, blue, 1});
 		CGContextFillPath(context);
