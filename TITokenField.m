@@ -662,7 +662,7 @@ NSString * const kTextHidden = @"\u200D"; // Zero-Width Joiner
 			NSArray * titles = self.tokenTitles;
 			untokenized = [titles componentsJoinedByString:@", "];
 			
-            CGSize untokSize = [untokenized sizeWithAttributes:@{NSFontAttributeName: [UIFont systemFontOfSize:14]}];
+			CGSize untokSize = [untokenized sizeWithFont:[UIFont systemFontOfSize:14]];
 			CGFloat availableWidth = self.bounds.size.width - self.leftView.bounds.size.width - self.rightView.bounds.size.width;
 			
 			if (_tokens.count > 1 && untokSize.width > availableWidth){
@@ -1137,10 +1137,10 @@ NSString * const kTextHidden = @"\u200D"; // Zero-Width Joiner
 #pragma mark - TIToken -
 //==========================================================
 
-NSLineBreakMode const kLineBreakMode = NSLineBreakByTruncatingTail;
 CGFloat const hTextPadding = 16;
 CGFloat const vTextPadding = 10;
 CGFloat const kDisclosureThickness = 1.0;
+UILineBreakMode const kLineBreakMode = UILineBreakModeTailTruncation;
 
 @interface TIToken (Private)
 CGPathRef CGPathCreateTokenPath(CGSize size, BOOL innerPath);
@@ -1278,19 +1278,10 @@ CGPathRef CGPathCreateDisclosureIndicatorPath(CGPoint arrowPointFront, CGFloat h
 		accessoryWidth += floorf(hTextPadding / 2);
 	}
 	
-    NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    paragraphStyle.lineBreakMode = kLineBreakMode;
-
-    CGRect titleFrame = [_title boundingRectWithSize:(CGSize){(_maxWidth - hTextPadding - accessoryWidth), CGFLOAT_MAX}
-                                             options:NSStringDrawingUsesLineFragmentOrigin
-                                          attributes:@{
-                                                       NSFontAttributeName: _font,
-                                                       NSParagraphStyleAttributeName: paragraphStyle
-                                                       }
-                                             context:nil];
-	CGFloat height = floorf(titleFrame.size.height + vTextPadding);
+	CGSize titleSize = [_title sizeWithFont:_font forWidth:(_maxWidth - hTextPadding - accessoryWidth) lineBreakMode:kLineBreakMode];
+	CGFloat height = floorf(titleSize.height + vTextPadding);
 	
-    return (CGSize){MAX(floorf(titleFrame.size.width + hTextPadding + accessoryWidth), height - 3), height};
+    return (CGSize){MAX(floorf(titleSize.width + hTextPadding + accessoryWidth), height - 3), height};
 }
 
 #pragma mark Drawing
@@ -1407,23 +1398,13 @@ CGPathRef CGPathCreateDisclosureIndicatorPath(CGPoint arrowPointFront, CGFloat h
 	
 	CGColorSpaceRelease(colorspace);
 	
-    NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    paragraphStyle.lineBreakMode = kLineBreakMode;
-    NSDictionary *attributes = @{
-                                 NSFontAttributeName: _font,
-                                 NSParagraphStyleAttributeName: paragraphStyle
-                                 };
-
-	CGRect titleFrame = [_title boundingRectWithSize:(CGSize){(_maxWidth - hTextPadding - accessoryWidth), CGFLOAT_MAX}
-                                             options:NSStringDrawingUsesLineFragmentOrigin
-                                          attributes:attributes
-                                             context:nil];
-	CGFloat vPadding = floor((self.bounds.size.height - titleFrame.size.height) / 2);
+	CGSize titleSize = [_title sizeWithFont:_font forWidth:(_maxWidth - hTextPadding - accessoryWidth) lineBreakMode:kLineBreakMode];
+	CGFloat vPadding = floor((self.bounds.size.height - titleSize.height) / 2);
 	CGFloat titleWidth = ceilf(self.bounds.size.width - hTextPadding - accessoryWidth);
 	CGRect textBounds = CGRectMake(floorf(hTextPadding / 2), vPadding - 1, titleWidth, floorf(self.bounds.size.height - (vPadding * 2)));
 	
 	CGContextSetFillColorWithColor(context, (drawHighlighted ? _highlightedTextColor : _textColor).CGColor);
-	[_title drawInRect:textBounds withAttributes:attributes];
+	[_title drawInRect:textBounds withFont:_font lineBreakMode:kLineBreakMode];
 }
 
 CGPathRef CGPathCreateTokenPath(CGSize size, BOOL innerPath) {
