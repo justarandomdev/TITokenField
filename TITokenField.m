@@ -110,30 +110,15 @@
 	[_contentView setBackgroundColor:[UIColor clearColor]];
 	[self addSubview:_contentView];
 	
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-		
-        // Disable this branch if needed later
-		UITableViewController * tableViewController = [[UITableViewController alloc] initWithStyle:UITableViewStylePlain];
-		[tableViewController.tableView setDelegate:self];
-		[tableViewController.tableView setDataSource:self];
-        tableViewController.preferredContentSize =CGSizeMake(400, 400);
-		
-		_resultsTable = tableViewController.tableView;
-        
-		_popoverController = [[UIPopoverController alloc] initWithContentViewController:tableViewController];
-	}
-	else
-	{
-		_resultsTable = [[UITableView alloc] initWithFrame:CGRectMake(0, tokenFieldBottom + 1, self.bounds.size.width, 10)];
-		[_resultsTable setSeparatorColor:[UIColor colorWithWhite:0.85 alpha:1]];
-		[_resultsTable setBackgroundColor:[UIColor colorWithRed:0.92 green:0.92 blue:0.92 alpha:1]];
-		[_resultsTable setDelegate:self];
-		[_resultsTable setDataSource:self];
-		[_resultsTable setHidden:YES];
-		[self addSubview:_resultsTable];
-		
-		_popoverController = nil;
-	}
+    _resultsTable = [[UITableView alloc] initWithFrame:CGRectMake(0, tokenFieldBottom + 1, self.bounds.size.width, 10)];
+    [_resultsTable setSeparatorColor:[UIColor colorWithWhite:0.85 alpha:1]];
+    [_resultsTable setBackgroundColor:[UIColor colorWithRed:0.92 green:0.92 blue:0.92 alpha:1]];
+    [_resultsTable setDelegate:self];
+    [_resultsTable setDataSource:self];
+    [_resultsTable setHidden:YES];
+    [self addSubview:_resultsTable];
+    
+    _popoverController = nil;
 	
     if (_shouldAlwaysShowSeparator) {
         [self bringSubviewToFront:_separator];
@@ -363,16 +348,8 @@
 
 
 - (void)setSearchResultsVisible:(BOOL)visible {
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-		
-		if (visible) [self presentpopoverAtTokenFieldCaretAnimated:YES];
-		else [_popoverController dismissPopoverAnimated:YES];
-	}
-	else
-	{
-		[_resultsTable setHidden:!visible];
-		[_tokenField setResultsModeEnabled:visible];
-	}
+    [_resultsTable setHidden:!visible];
+    [_tokenField setResultsModeEnabled:visible];
 }
 
 - (void)resultsForSearchString:(NSString *)searchString {
